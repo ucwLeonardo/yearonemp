@@ -15,6 +15,7 @@ itchatmp.update_config(itchatmp.WechatConfig(
 def text_reply(msg):
     text = msg['Content']
     openId = msg['FromUserName']
+    nickname = itchatmp.users.get_user_info(openId)['nickname']
 
     # tag user for subscribing this event
     if text[0] == 'E':
@@ -34,6 +35,8 @@ def text_reply(msg):
 
         text = text.replace(' ', '')
         event_name_chinese = text[1:]
+        print("handle subscribing of event {} for {}"
+              .format(event_name_chinese, nickname))
 
         if event_name_chinese in tag_dict_name2id:  # can subscribe this event
 
@@ -58,8 +61,12 @@ def text_reply(msg):
 
 @itchatmp.msg_register(itchatmp.content.EVENT)
 def event_reply(msg):
+    openId = msg['FromUserName']
+    nickname = itchatmp.users.get_user_info(openId)['nickname']
+
     if msg['Event'] == 'CLICK':
         if msg['EventKey'] == 'subscribe_event':
+            print("handle subscribe_event for {}".format(nickname))
             event_names = '，'.join(EVENT_NAME_C2E.keys())
             content = '回复 E+事件名 可订阅该事件，您将在每天上午9点左右' \
                       '获得一条含有该事件(近7日)列表的消息推送。\n\n' \
@@ -68,7 +75,7 @@ def event_reply(msg):
             return content
 
         if msg['EventKey'] == 'about_us':
-            print("handle about_us")
+            print("handle about_us for {}".format(nickname))
             content = "YearOne(新晋元年)是一家创业中的量化对冲基金公司。" \
                       "创始团队具有多年、多市场、多交易标的的投资经验，并以" \
                       "最严格的合规性与职业道德准准则来要求自己，通过借助" \
