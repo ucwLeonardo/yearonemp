@@ -4,60 +4,65 @@ from yearonequant.event_object import *
 
 
 itchatmp.update_config(itchatmp.WechatConfig(
-    token = 'YearoneInvest',
-    appId = 'wxb6c1126cee0cb7a6',
-    appSecret = '4bcf6c3e704f7f27af33f53daab5bc66'))
+    token='YearoneInvest',
+    appId='wxb6c1126cee0cb7a6',
+    appSecret='4bcf6c3e704f7f27af33f53daab5bc66'))
 
-# userId = 'o76L3w8Qg94y3efLpwm_Caor8oxw'
-# r = itchatmp.send('Hi Leo : )', userId)
+# openId = 'o76L3w8Qg94y3efLpwm_Caor8oxw'
+# r = itchatmp.send('Hi Leo : )', openId)
 # print(r)
 @itchatmp.msg_register(itchatmp.content.TEXT)
 def text_reply(msg):
     text = msg['Content']
-    # push event list
+    openId = msg['ToUserName']
+    # tag user
     if text[0] == 'E':
+
+        # get tag list
+        tag_list = itchatmp.users.get_tags()['tags']
+        # construct a map from event name to tag id
+        tag_dict_id2name = dict()
+        for tag in tag_list:
+            if tag['name'][:2] == '订阅':
+                tag_dict_id2name[tag['name'][2:]] = tag['id']
+        # construct a map from tag id to event name
+        tag_dict_name2id = dict()
+        for tag in tag_list:
+            if tag['name'][:2] == '订阅':
+                tag_dict_name2id[tag['id']] = tag['name'][2:]
+
         text = text.replace(' ', '')
         event_name_chinese = text[1:]
-        event_name = EVENT_NAME_C2E.get(event_name_chinese)
-        if event_name:  # has this event
-            print('pushing event {}'.format(event_name))
+        # get tag id for this event
+        tagId = tag_dict_name2id[event_name_chinese]
 
-            today = datetime.datetime.now() - datetime.timedelta(days=1)
-            today_str = datetime2ymd_str(today)
+        if tagId:  # can subscribe this event
+            # tag the user
+            itchatmp.users.add_users_into_tag(tagId, [openId])
 
-            file_path = 'file/event/{}/{}.txt' \
-                .format(today_str, event_name)
-            html_path = 'file/event/{}/{}.html' \
-                .format(today_str, event_name)
+            user_tagIds = itchatmp.users.get_tags_of_user(openId)['tagid_list']
+            user_tags = [tag_dict_id2name[tag_id] for tag_id in user_tagIds]
+            user_tags_str = '，'.join(user_tags)
+            content = '您已成功订阅{}事件，将从明天开始推送。\n' \
+                      '已关注事件：\n{}'.format(event_name_chinese, user_tags_str)
 
-            # read text file
-            with open(file_path) as file:
-                content = file.read()
-            # give a link to html page if list too long
-            if len(content) > 1000:
-                url = "http://139.224.234.82:8653/event/acquire?file={}" \
-                    .format(html_path)
-                hyper_link = "<a href=\"{}\">此链接</a>".format(url)
-                content = '因列表过长，只摘选部分事件，请点击{}查看完整列表。\n\n' \
-                          .format(hyper_link) + content
-                content = content[:1000]
-                content = content[:content.rfind('\n')] + '\n...\n'
         else:
-            content = '目前暂不支持事件{}，请尝试点击获取事件按钮。'\
+            content = '目前暂不支持订阅事件{}，请点击订阅事件按钮查看详情。'\
                 .format(event_name_chinese)
 
     else:
-        content = "请告诉我您关心的事件吧，回复E+事件名"
+        content = "请回复E+事件名,告诉我您想订阅的事件"
 
     return content
 
 @itchatmp.msg_register(itchatmp.content.EVENT)
 def event_reply(msg):
     if msg['Event'] == 'CLICK':
-        if msg['EventKey'] == 'acquire_event':
+        if msg['EventKey'] == 'subscribe_event':
             event_names = '，'.join(EVENT_NAME_C2E.keys())
-            content = '回复 E+事件名 可获得近7日发生该事件的股票列表。\n\n' \
-                      '比如回复： E增持， 便可获得增持事件的列表。\n\n' \
+            content = '回复 E+事件名 可订阅事件，您将在每天上午9点左右' \
+                      '获得一条含有该事件(近7日)列表的消息推送。\n\n' \
+                      '比如回复： E增持， 便可订阅增持事件。\n\n' \
                       '目前支持的事件有：\n{}。'.format(event_names)
             return content
 
