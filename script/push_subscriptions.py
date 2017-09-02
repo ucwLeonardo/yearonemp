@@ -18,7 +18,7 @@ for tag in tag_list:
         tag_dict_subscription[tag['id']] = tag['name'][2:]
 
 user_list = itchatmp.users.get_users()
-openId_list = user_list['data']['openId']
+openId_list = user_list['data']['openid']
 
 for openId in openId_list:  # loop over users
 

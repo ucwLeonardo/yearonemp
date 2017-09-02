@@ -14,29 +14,30 @@ itchatmp.update_config(itchatmp.WechatConfig(
 @itchatmp.msg_register(itchatmp.content.TEXT)
 def text_reply(msg):
     text = msg['Content']
-    openId = msg['ToUserName']
-    # tag user
+    openId = msg['FromUserName']
+
+    # tag user for subscribing this event
     if text[0] == 'E':
 
         # get tag list
         tag_list = itchatmp.users.get_tags()['tags']
         # construct a map from event name to tag id
-        tag_dict_id2name = dict()
-        for tag in tag_list:
-            if tag['name'][:2] == '订阅':
-                tag_dict_id2name[tag['name'][2:]] = tag['id']
-        # construct a map from tag id to event name
         tag_dict_name2id = dict()
         for tag in tag_list:
             if tag['name'][:2] == '订阅':
-                tag_dict_name2id[tag['id']] = tag['name'][2:]
+                tag_dict_name2id[tag['name'][2:]] = tag['id']
+        # construct a map from tag id to event name
+        tag_dict_id2name = dict()
+        for tag in tag_list:
+            if tag['name'][:2] == '订阅':
+                tag_dict_id2name[tag['id']] = tag['name'][2:]
 
         text = text.replace(' ', '')
         event_name_chinese = text[1:]
-        # get tag id for this event
-        tagId = tag_dict_name2id[event_name_chinese]
 
-        if tagId:  # can subscribe this event
+        if event_name_chinese in tag_dict_name2id:  # can subscribe this event
+
+            tagId = tag_dict_name2id[event_name_chinese]    # get tag id
             # tag the user
             itchatmp.users.add_users_into_tag(tagId, [openId])
 
@@ -60,7 +61,7 @@ def event_reply(msg):
     if msg['Event'] == 'CLICK':
         if msg['EventKey'] == 'subscribe_event':
             event_names = '，'.join(EVENT_NAME_C2E.keys())
-            content = '回复 E+事件名 可订阅事件，您将在每天上午9点左右' \
+            content = '回复 E+事件名 可订阅该事件，您将在每天上午9点左右' \
                       '获得一条含有该事件(近7日)列表的消息推送。\n\n' \
                       '比如回复： E增持， 便可订阅增持事件。\n\n' \
                       '目前支持的事件有：\n{}。'.format(event_names)
