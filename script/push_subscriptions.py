@@ -7,8 +7,6 @@ itchatmp.update_config(itchatmp.WechatConfig(
     appId='wxb6c1126cee0cb7a6',
     appSecret='4bcf6c3e704f7f27af33f53daab5bc66'))
 
-itchatmp.messages.send_all()
-
 today = datetime.datetime.now() - datetime.timedelta(days=1)
 today_str = datetime2ymd_str(today)
 
