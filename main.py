@@ -8,7 +8,7 @@ itchatmp.update_config(itchatmp.WechatConfig(
     appId='wxb6c1126cee0cb7a6',
     appSecret='4bcf6c3e704f7f27af33f53daab5bc66'))
 
-# openId = 'o76L3w8Qg94y3efLpwm_Caor8oxw'
+# openId = 'o76L3w8Qg94y3efLpwm_Caor8oxw
 # r = itchatmp.send('Hi Leo : )', openId)
 # print(r)
 @itchatmp.msg_register(itchatmp.content.TEXT)
@@ -68,8 +68,8 @@ def event_reply(msg):
         if msg['EventKey'] == 'subscribe_event':
             print("handle subscribe_event for {}".format(nickname))
             event_names = '，'.join(EVENT_NAME_C2E.keys())
-            content = '回复 E+事件名 可订阅该事件，您将在每天上午9点左右' \
-                      '获得一条含有该事件(近7日)列表的消息推送。\n\n' \
+            content = '回复 E+事件名 可订阅该事件，您将在每天上午8点半左右' \
+                      '获得一条含有该事件列表的消息推送。\n\n' \
                       '比如回复： E增持， 便可订阅增持事件。\n\n' \
                       '目前支持的事件有：\n{}。'.format(event_names)
             return content
