@@ -15,7 +15,12 @@ itchatmp.update_config(itchatmp.WechatConfig(
 def text_reply(msg):
     text = msg['Content']
     openId = msg['FromUserName']
-    nickname = itchatmp.users.get_user_info(openId)['nickname']
+    nickname = ''
+    try:
+        nickname = itchatmp.users.get_user_info(openId)['nickname']
+    except KeyError as ex:
+        print('openId is {}'.format(openId))
+        print(ex)
 
     # tag user for subscribing this event
     if text[0] == 'E':
@@ -62,7 +67,12 @@ def text_reply(msg):
 @itchatmp.msg_register(itchatmp.content.EVENT)
 def event_reply(msg):
     openId = msg['FromUserName']
-    nickname = itchatmp.users.get_user_info(openId)['nickname']
+    nickname = ''
+    try:
+        nickname = itchatmp.users.get_user_info(openId)['nickname']
+    except KeyError as ex:
+        print('openId is {}'.format(openId))
+        print(ex)
 
     if msg['Event'] == 'CLICK':
         if msg['EventKey'] == 'subscribe_event':
