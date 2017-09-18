@@ -56,7 +56,7 @@ def text_reply(msg):
                       '已关注事件：\n{}'.format(event_name_chinese, user_tags_str)
 
         else:
-            content = '目前暂不支持订阅事件{}，请点击订阅事件按钮查看详情。'\
+            content = '目前暂不支持订阅事件"{}"，请点击订阅事件按钮查看详情。'\
                 .format(event_name_chinese)
 
     else:
