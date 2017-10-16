@@ -1,6 +1,7 @@
 from yearonequant.event import *
 from yearonequant.event_object import *
 
+import subprocess
 from subprocess import call
 import os.path
 import os
@@ -15,6 +16,7 @@ ip.enable_gui = lambda x: False
 # initialize rqdatac to enable online functions such as get_price()
 rqdatac.init('xinjin', '123456', ('172.19.182.162', 16003))
 
+ANNOUNCE_FILE = '../Documents/announcements_abstract.csv'
 
 def previous_days_event2file(days_before_today):
     """
@@ -45,10 +47,24 @@ def previous_days_event2file(days_before_today):
     print("generating previous {} days announcement file..."
           .format(days_before_today))
 
+    # check if start_date in announcements, or the generated file will be all announce from 2010
+    start_query_date = start_date
+    start_query_date_str = datetime2ymd_str(start_query_date)
+    while start_query_date <= today: 
+        command = "grep -q '{}' {} && echo 1".format(start_query_date_str, ANNOUNCE_FILE) 
+        start_date_exist = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
+        if start_date_exist.stdout.decode('utf-8').replace('\n', '') == '1':
+            break
+        else:
+            print('date {} does not have announcements'.format(start_query_date_str))
+            start_query_date = start_query_date + datetime.timedelta(days=1)
+            start_query_date_str = datetime2ymd_str(start_query_date)
+    if start_query_date > today:
+        return write_file_path
+
     fd = open(write_file_path, "wb")
-    pattern_argument = "0,/{}/p".format(start_str)
-    call(["sed", "-n", pattern_argument,
-          "../Documents/announcements_abstract.csv"], stdout=fd)
+    pattern_argument = "0,/{}/p".format(start_query_date_str)
+    call(["sed", "-n", pattern_argument, ANNOUNCE_FILE], stdout=fd)
 
     print('file saved as {}\n'.format(write_file_path))
     return write_file_path

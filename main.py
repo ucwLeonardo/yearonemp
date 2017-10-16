@@ -8,6 +8,20 @@ itchatmp.update_config(itchatmp.WechatConfig(
     appId='wxb6c1126cee0cb7a6',
     appSecret='4bcf6c3e704f7f27af33f53daab5bc66'))
 
+# get tag list
+tag_list = itchatmp.users.get_tags()['tags']
+# construct a map from event name to tag id
+tag_dict_name2id = dict()
+for tag in tag_list:
+    if tag['name'][:2] == '订阅':
+        tag_dict_name2id[tag['name'][2:]] = tag['id']
+# construct a map from tag id to event name
+# NOTICE: chinese name of this idct has no prefix '订阅'
+tag_dict_id2name = dict()
+for tag in tag_list:
+    if tag['name'][:2] == '订阅':
+        tag_dict_id2name[tag['id']] = tag['name'][2:]
+
 # openId = 'o76L3w8Qg94y3efLpwm_Caor8oxw
 # r = itchatmp.send('Hi Leo : )', openId)
 # print(r)
@@ -24,19 +38,6 @@ def text_reply(msg):
 
     # tag user for subscribing this event
     if text[0] == 'E':
-
-        # get tag list
-        tag_list = itchatmp.users.get_tags()['tags']
-        # construct a map from event name to tag id
-        tag_dict_name2id = dict()
-        for tag in tag_list:
-            if tag['name'][:2] == '订阅':
-                tag_dict_name2id[tag['name'][2:]] = tag['id']
-        # construct a map from tag id to event name
-        tag_dict_id2name = dict()
-        for tag in tag_list:
-            if tag['name'][:2] == '订阅':
-                tag_dict_id2name[tag['id']] = tag['name'][2:]
 
         text = text.replace(' ', '')
         event_name_chinese = text[1:]
@@ -75,8 +76,17 @@ def event_reply(msg):
         print(ex)
 
     if msg['Event'] == 'CLICK':
+
+        if msg['EventKey'] == 'subscribed_event':
+            print("handle subscribed_event for {} {}".format(nickname, openId))
+            # get tag list
+            tag_list = itchatmp.users.get_user_info(openId)['tagid_list']
+            subscribed = [tag_dict_id2name[t] for t in tag_list]
+            content = "您目前已订阅的事件有：\n{}".format(','.join(subscribed))
+            return content
+
         if msg['EventKey'] == 'subscribe_event':
-            print("handle subscribe_event for {}".format(nickname))
+            print("handle subscribe_event for {} {}".format(nickname, openId))
             event_names = '，'.join(EVENT_NAME_C2E.keys())
             content = '回复 E+事件名 可订阅该事件，您将在每天上午8点半左右' \
                       '获得一条含有该事件列表的消息推送。\n\n' \
@@ -85,7 +95,7 @@ def event_reply(msg):
             return content
 
         if msg['EventKey'] == 'about_us':
-            print("handle about_us for {}".format(nickname))
+            print("handle about_us for {} {}".format(nickname, openId))
             content = "YearOne(新晋元年)是一家创业中的量化对冲基金公司。" \
                       "创始团队具有多年、多市场、多交易标的的投资经验，并以" \
                       "最严格的合规性与职业道德准准则来要求自己，通过借助" \

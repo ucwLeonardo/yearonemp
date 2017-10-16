@@ -46,4 +46,5 @@ for openId in openId_list:  # loop over users
     if has_subscription:
         itchatmp.send(content, openId)  # send to user
     else:
-        itchatmp.send('您还没有订阅事件，请点击\"订阅事件\"按钮查看详情', openId)
+        if datetime.datetime.today().weekday == 0:  # 0 means Monday
+            itchatmp.send('您还没有订阅事件，请点击\"订阅事件\"按钮查看详情', openId)
