@@ -16,7 +16,7 @@ ip.enable_gui = lambda x: False
 # initialize rqdatac to enable online functions such as get_price()
 rqdatac.init('xinjin', '123456', ('172.19.182.162', 16003))
 
-ANNOUNCE_FILE = '../Documents/announcements_abstract.csv'
+ANNOUNCE_FILE = '../../Documents/announcements_abstract.csv'
 
 def previous_days_event2file(days_before_today):
     """
@@ -33,11 +33,11 @@ def previous_days_event2file(days_before_today):
     start_display = start_date - datetime.timedelta(days=1)
     start_display_str = datetime2ymd_str(start_display)
 
-    directory = './file/event/{}'.format(today_str)
+    directory = '../file/event/{}'.format(today_str)
     if not os.path.isdir(directory):
         os.mkdir(directory)
 
-    write_file_path = './file/event/{}/events_from_{}_to_{}.csv' \
+    write_file_path = '../file/event/{}/events_from_{}_to_{}.csv' \
         .format(today_str, start_display_str, today_str)
 
     # return if already has the file
@@ -146,7 +146,7 @@ def event_to_push2file(event_name, days_before_today=7):
     start_str = matcher_start.group(1)
     today_str = matcher_end.group(1)
 
-    write_file_path = './file/event/{}/{}.txt'\
+    write_file_path = '../file/event/{}/{}.txt'\
         .format(today_str, event_name)
     write_fd = open(write_file_path, 'w+')
 
@@ -194,7 +194,7 @@ def event_to_push2file(event_name, days_before_today=7):
 
     # write to html file
     filtered_event_df = pd.DataFrame(series_list)
-    html_file_path = './file/event/{}/{}.html'\
+    html_file_path = '../file/event/{}/{}.html'\
         .format(today_str, event_name)
     event_df2html(filtered_event_df, html_file_path)
 

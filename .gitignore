@@ -64,3 +64,5 @@ note.txt
 .idea/
 yearonequant/__pycache__/
 _config.yml
+script/storage.pkl
+storage.pkl
